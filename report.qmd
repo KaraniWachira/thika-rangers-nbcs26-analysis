@@ -1,0 +1,188 @@
+---
+title: "NBCS 2026 Regular Season — Thika Rangers Batting Report"
+subtitle: "Nairobi Baseball Community Championship"
+author: "Keith Karani"
+date: last-modified
+format:
+  html:
+    theme:
+      - cosmo
+      - custom.scss
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    code-tools: true
+    code-fold: false
+    embed-resources: true
+  pdf:
+    documentclass: article
+    papersize: a4
+    geometry: margin=2.5cm
+editor: source
+execute:
+  cache: true
+  warning: false
+  message: false
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(gt)
+
+source("R/team_theme.R")
+source("R/functions.R")
+
+# Use targets output if available, otherwise compute live
+if (file.exists("output/batting_data.rds")) {
+  batting <- readRDS("output/batting_data.rds")
+  team_ss <- readRDS("output/team_summary.rds")
+} else {
+  batting <- read_batting_data()
+  team_ss <- compute_team_summary(batting)
+}
+```
+
+```{r include=FALSE}
+plots <- generate_all_plots(batting)
+gt_tab <- build_gt_batting_table(batting, team_ss)
+```
+
+## Executive Summary
+
+```{r}
+n_batters <- nrow(batting)
+```
+
+The **Thika Rangers** close out the **NBCS 2026 Regular Season** with `r n_batters` batters who have recorded at least one plate appearance this season. This report provides a comprehensive view of the team's offensive profile through twelve visualisations and a full interactive batting table.
+
+| Metric | Value |
+|:-------|:-----:|
+| **AVG** (Batting Average) | `r team_ss$team_AVG` |
+| **OBP** (On-Base Percentage) | `r team_ss$team_OBP` |
+| **SLG** (Slugging Percentage) | `r team_ss$team_SLG` |
+| **OPS** (On-Base + Slugging) | `r team_ss$team_OPS` |
+| Total Plate Appearances | `r team_ss$total_PA` |
+| Total Runs Scored | `r team_ss$total_R` |
+| Total Runs Batted In | `r team_ss$total_RBI` |
+| Home Runs | `r team_ss$total_HR` |
+| Extra-Base Hits | `r team_ss$total_XBH` |
+
+## Full Batting Table
+
+```{r, echo=FALSE, fig.width=10, fig.height=6}
+gt_tab
+```
+
+## Offensive Profile Matrix
+
+```{r fig01, fig.width=14, fig.height=7}
+plots$matrix
+```
+
+The **Offensive Profile Matrix** presents four core rate statistics side-by-side: AVG, OBP, SLG, and OPS. The dashed line in each panel represents the team mean, making it easy to identify which players excel in each dimension. A lollipop design highlights individual deviations from the team baseline.
+
+## OBP vs SLG Quadrant Analysis
+
+```{r fig02, fig.width=11, fig.height=8}
+plots$quadrant
+```
+
+The **quadrant chart** divides players based on whether they are above or below the team median in OBP and SLG:
+
+- **Sweet Spot (top-right)** — elite all-around hitters
+- **High OBP / Low SLG (bottom-right)** — table setters who get on base
+- **High SLG / Low OBP (top-left)** — power hitters who need more discipline
+- **Needs Work (bottom-left)** — room for improvement in both areas
+
+## Offensive Trinity Bubble
+
+```{r fig08, fig.width=11, fig.height=8}
+plots$triple
+```
+
+The **Offensive Trinity** visualises three key dimensions in a single chart: On-Base Percentage (x-axis), Slugging Percentage (y-axis), and Batting Average (fill colour). Bubble size reflects plate appearance volume. Players who excel in all three dimensions cluster in the upper-right quadrant with darker fills.
+
+## Pitching Summary — Maina Isaiah · Tuju Oduori · Derrick Mwendwa · Caleb Ochego
+
+```{r fig09, fig.width=14, fig.height=9}
+plots$contributions
+```
+
+The **Pitching Summary** heatmap displays 11 key stats for the four primary pitchers across three domains:
+
+- **Volume**: innings pitched (IP), hits allowed (H), earned runs (ER), walks (BB), strikeouts (SO)
+- **Control**: strikeout-to-walk ratio (K/BB)
+- **Results**: wins (W), losses (L), earned run average (ERA), walks plus hits per inning (WHIP), batting average against (BAA)
+
+Tile colours rank pitchers within each stat (green = best, red = worst). The lower panel compares the three essential rate stats — ERA, WHIP, and K/BB — side by side.
+
+## Hit Type Composition
+
+```{r fig03, fig.width=12, fig.height=6}
+plots$composition
+```
+
+Each bar shows the *proportion* of singles, doubles, triples, and home runs among a player's total hits. Players with no hits are excluded. A higher proportion of extra-base hits (2B, 3B, HR) indicates greater power output relative to contact.
+
+## Plate Discipline
+
+```{r fig04, fig.width=10, fig.height=8}
+plots$discipline
+```
+
+Players above the dotted line strike out more often than they walk; those below it draw more walks than strikeouts. Dot colour reflects OBP. This chart is a key indicator of plate discipline — hitters who walk more than they strike out tend to have higher on-base percentages.
+
+## Extra-Base Hit Rate
+
+```{r fig10, fig.width=12, fig.height=7}
+plots$xbh_rate
+```
+
+The **Extra-Base Hit Rate** shows what proportion of each player's hits went for extra bases (doubles, triples, or home runs). Colour reflects slugging percentage. This metric isolates raw power contribution independently of batting average.
+
+## Contact Quality: AVG vs SLG
+
+```{r fig11, fig.width=11, fig.height=8}
+plots$contact_slg
+```
+
+Does a high batting average translate into power? The **Contact Quality** scatter plot tracks the relationship between AVG and SLG with a linear trend line. Players above the trend line generate more power than expected given their contact rate; those below are contact-first hitters.
+
+## Counting Stats Heatmap
+
+```{r fig05, fig.width=12, fig.height=7}
+plots$heatmap
+```
+
+A comprehensive overview of all counting statistics in a single heatmap. Darker tiles indicate higher counts, making it easy to scan for volume leaders across every offensive category.
+
+## OPS Leaderboard
+
+```{r fig06, fig.width=10, fig.height=7}
+plots$leaderboard
+```
+
+OPS (On-Base Plus Slugging) is the single most comprehensive measure of offensive output, combining the ability to reach base with raw power. Players are ranked from highest to lowest OPS.
+
+## Run Production
+
+```{r fig07, fig.width=10, fig.height=8}
+plots$production
+```
+
+Players above the dotted line drive in more runs than they score themselves (clutch RBI producers). The chart also reveals which players are scoring runs but not driving them in (table setters) versus those who produce RBI despite limited scoring opportunities.
+
+## PA Distribution
+
+```{r fig12, fig.width=12, fig.height=7}
+plots$pa_dist
+```
+
+The **Plate Appearance Distribution** chart shows playing time volume across the roster. Bar length indicates total PA and point colour reflects OBP, allowing a quick assessment of whether the most-used hitters are also the most productive.
+
+---
+
+---
+
+*Data: Nairobi Baseball Community. Analysis by Keith Karani using R {targets} pipeline. Report generated on `r Sys.Date()`.*

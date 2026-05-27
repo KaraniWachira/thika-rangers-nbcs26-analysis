@@ -1,0 +1,15 @@
+.git
+.gitignore
+.gitattributes
+_targets/
+output/
+*.png
+*.rds
+.DS_Store
+.RData
+.Rhistory
+.Rproj.user
+README.md
+report.qmd
+custom.scss
+thika_rangers_analysis.R

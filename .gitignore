@@ -1,0 +1,17 @@
+# targets pipeline cache
+_targets/
+
+# Pipeline outputs (reproducible via tar_make())
+output/
+
+# Root-level exported PNGs (from initial exploration)
+*.png
+
+# R session files
+.RData
+.Rhistory
+.Rproj.user
+
+# OS junk
+.DS_Store
+Thumbs.db

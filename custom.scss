@@ -1,0 +1,45 @@
+/*-- Theme customisation for Quarto report --*/
+
+$primary: #0A1F3F;
+$secondary: #C41E3A;
+$success: #2ECC71;
+$info: #3498DB;
+$warning: #F39C12;
+$danger: #E74C3C;
+
+/* Navbar theming */
+.navbar {
+  background-color: $primary !important;
+}
+
+.navbar-dark .navbar-brand,
+.navbar-dark .nav-link {
+  color: #fff !important;
+}
+
+/* Table of contents */
+.toc .nav-link.active {
+  border-left-color: $secondary;
+  color: $secondary !important;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5 {
+  color: $primary;
+}
+
+h2 {
+  border-bottom: 2px solid $secondary;
+  padding-bottom: 0.3rem;
+}
+
+/* Code blocks */
+code {
+  color: $secondary;
+}
+
+/* Figure captions */
+.figure-caption {
+  color: #666;
+  font-size: 0.85rem;
+}
