@@ -1,30 +1,34 @@
-FROM rocker/shiny:4.4.3
+# Use the official rocker image optimized for Shiny Server
+FROM rocker/shiny:4.3.3
 
-LABEL description="Thika Rangers NBCS 2026 — Interactive Season Analysis Dashboard"
-LABEL maintainer="Keith Karani"
-
-# ── System dependencies ──────────────────────────────────────────────
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libfftw3-dev \
-    libx11-dev \
-    libxt-dev \
+# Install underlying Linux system dependencies required for data/pipeline packages
+RUN apt-get update && apt-get install -y \
+    libcurl4-gnutls-dev \
+    libssl-dev \
+    libxml2-dev \
+    libgit2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# ── R packages ───────────────────────────────────────────────────────
-RUN R -e "install.packages(c( \
-    'bslib', 'dplyr', 'tidyr', 'ggplot2', 'plotly', \
-    'gt', 'DT', 'scales', 'patchwork', 'targets', \
-    'imager', 'fontawesome', 'magrittr' \
-  ), repos = 'https://cloud.r-project.org', Ncpus = parallel::detectCores())" \
-  && rm -rf /tmp/downloaded_packages
+# Copy our custom network configuration into the container
+COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
 
-# ── Copy project ─────────────────────────────────────────────────────
-COPY . /app
-WORKDIR /app
+# Clean out any boilerplate example applications provided by the base image
+RUN rm -rf /srv/shiny-server/*
 
-# ── Run pipeline to pre-compute outputs ─────────────────────────────
-RUN R -e "targets::tar_make()"
+# Install the explicit R packages required for your pipeline and interface
+RUN R -e "install.packages(c('shiny', 'bslib', 'tidyverse', 'targets'), repos='https://cloud.r-project.org/')"
 
-# ── Port and startup ────────────────────────────────────────────────
-EXPOSE 3838
-CMD ["R", "-e", "shiny::runApp('shiny/app.R', host = '0.0.0.0', port = 3838)"]
+# Copy your local R application source files into the default hosting directory
+COPY . /srv/shiny-server/
+
+# --- CRITICAL FOR TARGETS ---
+# Ensure the background 'shiny' user owns EVERYTHING, including the _targets store,
+# so that the app can read the cache without data permission blocks.
+RUN chown -R shiny:shiny /srv/shiny-server \
+    && chown -R shiny:shiny /var/log/shiny-server
+
+# Expose the internal port to match our config file
+EXPOSE 7860
+
+# Execute the pre-installed application server binary on startup
+CMD ["/usr/bin/shiny-server"]
