@@ -19,7 +19,7 @@ COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
 RUN rm -rf /srv/shiny-server/*
 
 # Install the explicit R packages required for your pipeline and interface
-RUN R -e "install.packages(c('shiny', 'bslib', 'tidyverse', 'targets'), repos='https://cloud.r-project.org/')"
+RUN R -e "install.packages(c('shiny', 'bslib', 'tidyverse', 'targets', 'imager','gt'), repos='https://cloud.r-project.org/')"
 
 # Copy your ENTIRE local project directory layout into the container
 # This copies _targets.R, the R/ folder, and the shiny/ folder perfectly
