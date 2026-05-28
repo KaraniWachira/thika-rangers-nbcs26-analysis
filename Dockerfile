@@ -9,10 +9,10 @@ RUN apt-get update && apt-get install -y \
     libgit2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# --- FIX: Set the explicit internal working directory path ---
+# Set the internal working directory to the default server root
 WORKDIR /srv/shiny-server
 
-# Copy our custom network configuration into the container
+# Copy our custom web server network configuration into the container
 COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
 
 # Clean out any boilerplate example applications provided by the base image
@@ -21,8 +21,14 @@ RUN rm -rf /srv/shiny-server/*
 # Install the explicit R packages required for your pipeline and interface
 RUN R -e "install.packages(c('shiny', 'bslib', 'tidyverse', 'targets'), repos='https://cloud.r-project.org/')"
 
-# Copy your local R application source files directly into the active WORKDIR
-COPY . .
+# Copy your ENTIRE local project directory layout into the container
+# This copies _targets.R, the R/ folder, and the shiny/ folder perfectly
+COPY . /srv/shiny-server/
+
+# --- THE FIX FOR TARGETS + SHINY SUBFOLDER ---
+# Move the contents of your shiny/ folder directly up to the server root 
+# so Shiny Server sees it immediately, while keeping it in the same directory as _targets.R
+RUN cp -r /srv/shiny-server/shiny/* /srv/shiny-server/
 
 # Ensure the background 'shiny' user owns everything inside the working environment
 RUN chown -R shiny:shiny /srv/shiny-server \
